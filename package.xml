@@ -1,0 +1,29 @@
+<?xml version="1.0"?>
+<package>
+  <name>autolander</name>
+  <version>0.0.0</version>
+  <description>Autolands on wifi loss</description>
+
+  <maintainer email="derp@todo.todo">nick</maintainer>
+
+  <license>TODO</license>
+
+  <buildtool_depend>catkin</buildtool_depend>
+  <build_depend>geometry_msgs</build_depend>
+  <build_depend>std_msgs</build_depend>
+  <build_depend>cmake_modules</build_depend>
+  <build_depend>roscpp</build_depend>
+  <build_depend>mg_msgs</build_depend>
+  <build_depend>nav_msgs</build_depend>
+  
+  <run_depend>geometry_msgs</run_depend>
+  <run_depend>std_msgs</run_depend>
+  <run_depend>cmake_modules</run_depend> 
+  <run_depend>roscpp</run_depend>
+  <run_depend>mg_msgs</run_depend>
+  <run_depend>nav_msgs</run_depend>
+
+
+  <export>
+  </export>
+</package>
