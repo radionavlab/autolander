@@ -20,11 +20,13 @@ public:
 	void imuCallback(const sensor_msgs::Imu::ConstPtr &msg);
 	void odomCallback(const nav_msgs::Odometry::ConstPtr &msg);
 	void timerCallback(const ros::TimerEvent &event);
+	void thrRepeatCallback(const std_msgs::Float64::ConstPtr &msg);
+	void attRepeatCallback(const geometry_msgs::PoseStamped::ConstPtr &msg);
 
 private:
 	double yaw_, twLand_, autoDisarmThreshold_;
 	ros::Publisher thrustPub_, attSetPub_;
-	ros::Subscriber gpsSub_, joySub_, imuSub_, statusSub_;
+	ros::Subscriber gpsSub_, joySub_, imuSub_, statusSub_, throttleSub_, attThrottleSub_;
 	ros::Timer timerPub_;
 	bool isDisarmed_, hasNotLanded_, wifiIsGreen_;	
 

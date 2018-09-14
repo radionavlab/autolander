@@ -25,11 +25,13 @@ int main(int argc, char **argv)
 autolander::autolander(ros::NodeHandle &nh)
 {
 	double twTemp;
-	std::string nodename, detectorTopic;
+	std::string nodename, detectorTopic, thrTopic, attTopic;
 	nodename = ros::this_node::getName();
 	ros::param::get(nodename + "/twMax",twTemp);
-	ros::param::get(nodename + "/inputTopic",detectorTopic);
+	ros::param::get(nodename + "/wifiTopic",detectorTopic);
 	ros::param::get(nodename + "/disarmThresh",autoDisarmThreshold_);
+	ros::param::get(nodename + "/throttleInputTopic",thrTopic);
+	ros::param::get(nodename + "/attitudeInputTopic",attTopic);
 	double pubrate(20.0);
 	twLand_ = 0.8/twTemp;  //landing accelerates to 0.2gs
 	isDisarmed_ = false;
@@ -39,12 +41,31 @@ autolander::autolander(ros::NodeHandle &nh)
 	joySub_ = nh.subscribe("joy", 1, &autolander::joyCallback, this, ros::TransportHints().unreliable().reliable().tcpNoDelay());
 	imuSub_ = nh.subscribe("mavros/imu/data_raw", 1, &autolander::imuCallback, this, ros::TransportHints().unreliable().reliable().tcpNoDelay());
 	statusSub_ = nh.subscribe(detectorTopic.c_str(), 1, &autolander::statusCallback, this, ros::TransportHints().unreliable().reliable().tcpNoDelay());
+	throttleSub_ = nh.subscribe(thrTopic.c_str(), 1, &autolander::thrRepeatCallback, this, ros::TransportHints().unreliable().reliable().tcpNoDelay());
+	attThrottleSub_ = nh.subscribe(attTopic.c_str(), 1, &autolander::attRepeatCallback, this, ros::TransportHints().unreliable().reliable().tcpNoDelay());
 	thrustPub_ = nh.advertise<std_msgs::Float64>("mavros/setpoint_attitude/att_throttle", 1);
 	attSetPub_ = nh.advertise<geometry_msgs::PoseStamped>("mavros/setpoint_attitude/attitude",1);
 	timerPub_ = nh.createTimer(ros::Duration(1.0/pubrate), &autolander::timerCallback, this, false);
 }
 
 //Callbacks
+void autolander::thrRepeatCallback(const std_msgs::Float64::ConstPtr &msg)
+{
+	if(wifiIsGreen_)
+	{
+		thrustPub_.publish(*msg);
+	}
+}
+
+
+void autolander::attRepeatCallback(const geometry_msgs::PoseStamped::ConstPtr &msg)
+{
+	if(wifiIsGreen_)
+	{
+		attSetPub_.publish(*msg);
+	}
+}
+
 
 //Listens to wifi topic
 void autolander::statusCallback(const mg_msgs::WifiStatus::ConstPtr &msg)
