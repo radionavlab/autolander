@@ -1,7 +1,8 @@
 #include "autolander.hpp"
+#include <ros/ros.h>
 
 
-int int main(int argc, char const *argv[])
+int main(int argc, char **argv)
 {
 	ros::init(argc, argv, "autolander");
  	ros::NodeHandle nh;
@@ -21,7 +22,7 @@ int int main(int argc, char const *argv[])
 }
 
 
-autolander::autolander(ros::nodeHandle &nh)
+autolander::autolander(ros::NodeHandle &nh)
 {
 	double twTemp;
 	std::string nodename, detectorTopic;
@@ -30,32 +31,35 @@ autolander::autolander(ros::nodeHandle &nh)
 	ros::param::get(nodename + "/inputTopic",detectorTopic);
 	ros::param::get(nodename + "/disarmThresh",autoDisarmThreshold_);
 	double pubrate(20.0);
-	twLand_ = 0.8/twLand;  //landing accelerates to 0.2gs
+	twLand_ = 0.8/twTemp;  //landing accelerates to 0.2gs
 	isDisarmed_ = false;
 	hasNotLanded_ = true;
 	wifiIsGreen_ = true;
 	gpsSub_ = nh.subscribe("local_odom", 1, &autolander::odomCallback, this, ros::TransportHints().unreliable().reliable().tcpNoDelay());
 	joySub_ = nh.subscribe("joy", 1, &autolander::joyCallback, this, ros::TransportHints().unreliable().reliable().tcpNoDelay());
 	imuSub_ = nh.subscribe("mavros/imu/data_raw", 1, &autolander::imuCallback, this, ros::TransportHints().unreliable().reliable().tcpNoDelay());
-	statusSub_ = nh.subscribe(detectorTopic, 1, autolander::statusCallback, this, ros::TransportHints().unreliable().reliable().tcpNoDelay());)
-	thrustPub_ = n.advertise<std_msgs::Float64>("mavros/setpoint_attitude/att_throttle", 1);
-	attSetPub_ = n.advertise<geometry_msgs::PoseStamped>("mavros/setpoint_attitude/attitude",1);
-	timerPub_ = nh.createTimer(ros::Duration(1.0/pubRate), &autolander::timerCallback, this, false);
+	statusSub_ = nh.subscribe(detectorTopic.c_str(), 1, &autolander::statusCallback, this, ros::TransportHints().unreliable().reliable().tcpNoDelay());
+	thrustPub_ = nh.advertise<std_msgs::Float64>("mavros/setpoint_attitude/att_throttle", 1);
+	attSetPub_ = nh.advertise<geometry_msgs::PoseStamped>("mavros/setpoint_attitude/attitude",1);
+	timerPub_ = nh.createTimer(ros::Duration(1.0/pubrate), &autolander::timerCallback, this, false);
 }
 
 //Callbacks
 
 //Listens to wifi topic
-void autolander::statusCallback(const mg_msgs::wifiStatus::ConstPtr &msg)
+void autolander::statusCallback(const mg_msgs::WifiStatus::ConstPtr &msg)
 {
-	wifiIsGreen_ = msg -> wifiStatus;
+	std::string comparisonString("live");
+	std::string status = msg->status;
+	if(status.compare(comparisonString.c_str()) !=0 )
+	{wifiIsGreen_=false;}
 }
 
 //Joy is used to determine whether or not the quad is armed
 void autolander::joyCallback(const sensor_msgs::Joy::ConstPtr &msg)
 {
 	if(msg->buttons[0]==1)
-	{isDisarmed=true;}
+	{isDisarmed_=true;}
 }
 
 
