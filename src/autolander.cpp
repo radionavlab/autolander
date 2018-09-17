@@ -25,13 +25,14 @@ int main(int argc, char **argv)
 autolander::autolander(ros::NodeHandle &nh)
 {
 	double twTemp;
-	std::string nodename, detectorTopic, thrTopic, attTopic;
+	std::string nodename, detectorTopic, thrTopic, attTopic, posRefTopic;
 	nodename = ros::this_node::getName();
 	ros::param::get(nodename + "/twMax",twTemp);
 	ros::param::get(nodename + "/wifiTopic",detectorTopic);
 	ros::param::get(nodename + "/disarmThresh",autoDisarmThreshold_);
 	ros::param::get(nodename + "/throttleInputTopic",thrTopic);
 	ros::param::get(nodename + "/attitudeInputTopic",attTopic);
+	ros::param::get(nodename + "/positionReferenceTopic",posRefTopic);
 	double pubrate(20.0);
 	twLand_ = 0.8/twTemp;  //landing accelerates to 0.2gs
 	isDisarmed_ = false;
@@ -43,8 +44,10 @@ autolander::autolander(ros::NodeHandle &nh)
 	statusSub_ = nh.subscribe(detectorTopic.c_str(), 1, &autolander::statusCallback, this, ros::TransportHints().unreliable().reliable().tcpNoDelay());
 	throttleSub_ = nh.subscribe(thrTopic.c_str(), 1, &autolander::thrRepeatCallback, this, ros::TransportHints().unreliable().reliable().tcpNoDelay());
 	attThrottleSub_ = nh.subscribe(attTopic.c_str(), 1, &autolander::attRepeatCallback, this, ros::TransportHints().unreliable().reliable().tcpNoDelay());
+	posLocalSub_ = nh.subscribe(posRefTopic.c_str(), 1, &autolander::posRepeatCallback, this, ros::TransportHints().unreliable().reliable().tcpNoDelay());
 	thrustPub_ = nh.advertise<std_msgs::Float64>("mavros/setpoint_attitude/att_throttle", 1);
 	attSetPub_ = nh.advertise<geometry_msgs::PoseStamped>("mavros/setpoint_attitude/attitude",1);
+	posSetPub_ = nh.advertise<geometry_msgs::PoseStamped>("mavros/setpoint_position/local", 1);
 	timerPub_ = nh.createTimer(ros::Duration(1.0/pubrate), &autolander::timerCallback, this, false);
 }
 
@@ -63,6 +66,15 @@ void autolander::attRepeatCallback(const geometry_msgs::PoseStamped::ConstPtr &m
 	if(wifiIsGreen_)
 	{
 		attSetPub_.publish(*msg);
+	}
+}
+
+
+void autolander::posRepeatCallback(const geometry_msgs::PoseStamped::ConstPtr &msg)
+{
+	if(wifiIsGreen_)
+	{
+		posSetPub_.publish(*msg);
 	}
 }
 

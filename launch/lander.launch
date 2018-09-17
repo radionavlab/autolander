@@ -5,10 +5,11 @@
     output="screen">
 
     <!-- Topic repeaters -->
-    <param name="throttleInputTopic" type="string" value="mavros/thrust_IN"/>
-    <param name="attitudeInputTopic" type="string" value="mavros/att_IN"/>
+    <param name="throttleInputTopic" type="string" value="mavros/setpoint_attitude/att_throttle_AL"/>
+    <param name="attitudeInputTopic" type="string" value="mavros/setpoint_attitude/attitude_AL"/>
+    <param name="positionReferenceTopic" type="string" value="mavros/setpoint_attitude/attitude_AL"/>
 
-    <param name="twMax" value="1.7"/>
+    <param name="twMax" value="1.8"/>
     <param name="wifiTopic" type="string" value="10801"/>
     <param name="disarmThresh" value="0.5"/>
 
