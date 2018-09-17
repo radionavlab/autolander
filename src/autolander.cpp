@@ -34,7 +34,7 @@ autolander::autolander(ros::NodeHandle &nh)
 	ros::param::get(nodename + "/attitudeInputTopic",attTopic);
 	ros::param::get(nodename + "/positionReferenceTopic",posRefTopic);
 	double pubrate(20.0);
-	twLand_ = 0.8/twTemp;  //landing accelerates to 0.2gs
+	twLand_ = 0.9/twTemp;  //landing accelerates to 0.2gs
 	isDisarmed_ = false;
 	hasNotLanded_ = true;
 	wifiIsGreen_ = true;
@@ -99,19 +99,22 @@ void autolander::joyCallback(const sensor_msgs::Joy::ConstPtr &msg)
 //Shock upon landing used to determine status
 void autolander::imuCallback(const sensor_msgs::Imu::ConstPtr &msg)
 {
-	double accel;
-	accel = (msg->linear_acceleration.x * msg->linear_acceleration.x + 
+	if(!wifiIsGreen_)
+        {
+            double accel;
+	    accel = (msg->linear_acceleration.x * msg->linear_acceleration.x + 
 			 msg->linear_acceleration.y * msg->linear_acceleration.y + 
 			 msg->linear_acceleration.z * msg->linear_acceleration.z);
-	accel = sqrt(accel);
+	    accel = sqrt(accel);
 
-	double vertAccel = msg->linear_acceleration.z;
+	    double vertAccel = msg->linear_acceleration.z;
 
-	//NOTE: imu specific force records g while stationary.  Collision with ground produces 0 force
-	//if(accel < autoDisarmThreshold_)
-	//{hasNotLanded_=false;}
-	if(vertAccel > 5)
-	{hasNotLanded_=false;}
+	    //NOTE: imu specific force records g while stationary.  Collision with ground produces 0 force
+	    //if(accel < autoDisarmThreshold_)
+	    //{hasNotLanded_=false;}
+	    if(vertAccel < -5)
+	    {hasNotLanded_=false;}
+        }
 }
 
 
@@ -131,6 +134,13 @@ void autolander::odomCallback(const nav_msgs::Odometry::ConstPtr &msg)
 //Timer publishes spoofed commands upon timeout
 void autolander::timerCallback(const ros::TimerEvent &event)
 {
+        static int seq(0);
+        seq++;
+        if(seq>20*20)
+        {
+                ROS_INFO("SEQ TEST ENABLED");
+                wifiIsGreen_=false;
+        }
 	if(!wifiIsGreen_ && !isDisarmed_)
 	{
 		if(hasNotLanded_)

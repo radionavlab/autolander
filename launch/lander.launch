@@ -10,7 +10,7 @@
     <param name="positionReferenceTopic" type="string" value="mavros/setpoint_attitude/attitude_AL"/>
 
     <param name="twMax" value="1.8"/>
-    <param name="wifiTopic" type="string" value="10801"/>
+    <param name="wifiTopic" type="string" value="temp"/>
     <param name="disarmThresh" value="0.5"/>
 
 
