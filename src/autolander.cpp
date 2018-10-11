@@ -136,7 +136,7 @@ void autolander::timerCallback(const ros::TimerEvent &event)
 {
         static int seq(0);
         seq++;
-/*        if(seq>20*20)
+        /*if(seq>20*20)
         {
                 ROS_INFO("SEQ TEST ENABLED");
                 wifiIsGreen_=false;
