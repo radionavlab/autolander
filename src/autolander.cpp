@@ -80,11 +80,11 @@ void autolander::posRepeatCallback(const geometry_msgs::PoseStamped::ConstPtr &m
 
 
 //Listens to wifi topic
-void autolander::statusCallback(const mg_msgs::WifiStatus::ConstPtr &msg)
+void autolander::statusCallback(const mg_msgs::PingStatus::ConstPtr &msg)
 {
-	std::string comparisonString("live");
-	std::string status = msg->status;
-	if(status.compare(comparisonString.c_str()) !=0 )
+	std::string comparisonString("ground_ip");
+	std::string interface = msg->host;
+	if(interface.compare(comparisonString.c_str()) !=0 && !msg->alive)
 	{wifiIsGreen_=false;}
 }
 

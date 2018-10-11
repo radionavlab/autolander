@@ -1,6 +1,7 @@
 #pragma once
 #include <ros/ros.h>
 #include <Eigen/Geometry>
+#include <mg_msgs/PingStatus.h>
 #include <sensor_msgs/Imu.h>
 #include <sensor_msgs/Joy.h>
 #include <mg_msgs/WifiStatus.h>
@@ -15,7 +16,7 @@ class autolander
 {
 public:
 	autolander(ros::NodeHandle &nh);
-	void statusCallback(const mg_msgs::WifiStatus::ConstPtr &msg);
+	void statusCallback(const mg_msgs::PingStatus::ConstPtr &msg);
 	void joyCallback(const sensor_msgs::Joy::ConstPtr &msg);
 	void imuCallback(const sensor_msgs::Imu::ConstPtr &msg);
 	void odomCallback(const nav_msgs::Odometry::ConstPtr &msg);
